@@ -2,8 +2,8 @@ from django.db import models
 from users.models import Employer, Area, Applicant
 
 class BaseModel(models.Model):
-    created_date = models.DateField(auto_now_add=True, null=True)
-    updated_date = models.DateField(auto_now=True, null=True)
+    created_date = models.DateTimeField(auto_now_add=True, null=True)
+    updated_date = models.DateTimeField(auto_now=True, null=True)
     active = models.BooleanField(default=True)
 
     class Meta:
@@ -20,10 +20,15 @@ class Recruitment(BaseModel):
     sex = models.CharField(max_length=50)
     workingForm = models.CharField(max_length=255)
     # carrers = models.ForeignKey(Career, on_delete=models.RESTRICT, null=True) #nhớ sửa lại sau khi xong
-    areas = models.ManyToManyField(Area)
+    # areas = models.ManyToManyField(Area)
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        ordering = ['-created_date','updated_date']
+
+
 
 
 class JobApplication(BaseModel):

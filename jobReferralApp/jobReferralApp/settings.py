@@ -36,7 +36,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users.apps.UsersConfig',
-    'jobs.apps.JobsConfig'
+    'jobs.apps.JobsConfig',
+    'rest_framework',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -83,11 +85,12 @@ DATABASES = {
 }
 
 import pymysql
+
 pymysql.install_as_MySQLdb()
 
 AUTH_USER_MODEL = 'users.User'
 
-#noi upload anh
+# noi upload anh
 MEDIA_ROOT = '%s/users/static/' % BASE_DIR
 
 # Password validation
@@ -119,15 +122,12 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST ='smtp.gmail.com'
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = '2151013090thao@ou.edu.vn'
 EMAIL_HOST_PASSWORD = '285910052'
-
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
@@ -138,5 +138,3 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
