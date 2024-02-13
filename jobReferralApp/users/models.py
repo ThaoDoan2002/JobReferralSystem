@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from cloudinary.models import CloudinaryField
 from enum import Enum
 
 
@@ -43,7 +44,7 @@ class WageChoices(Enum):
 
 
 class User (AbstractUser):
-    avatar = models.ImageField(upload_to='users/%Y/%m', null=True, blank=True)
+    avatar = CloudinaryField('avatar', null=True)
     phoneNumber = models.CharField(max_length=255)
     is_employer = models.BooleanField(default=False)
     is_applicant = models.BooleanField(default=False)

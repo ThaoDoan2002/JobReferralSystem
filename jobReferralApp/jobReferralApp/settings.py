@@ -39,7 +39,26 @@ INSTALLED_APPS = [
     'jobs.apps.JobsConfig',
     'rest_framework',
     'drf_yasg',
+    'cloudinary',
+    'oauth2_provider'
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+    )
+}
+
+import cloudinary
+
+cloudinary.config(
+    cloud_name="dzrgeifj0",
+    api_key="379262584825783",
+    api_secret="Jfur6eOyJ9gMBbbdM9nwBGKoL4E"
+)
+
+MAILCHIMP_API_KEY = 'e4bc513bb8a430403af5f826dba47590-us17'
+MAILCHIMP_LIST_ID = '6c0097fbaa'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -138,3 +157,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CLIENT_ID = "LwIYI8rfaX0ttTLcR3z7KvMU9uv0QKyHBpKHnnHy"
+CLIENT_SECRET = "YZpwQxDUoo6KLkGyNsqcIiBn87CD7igJrBEHqbHRiPNHqisgS8OKTCZvXXb50BRn5GKunJCUCwECa3uz9QjBJ2C0BoR5XXZtSAZDNWbthxtc23eVWqzOKIphTrobaQ3X"
