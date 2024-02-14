@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from users.models import User
+from users.models import User, Applicant, Employer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -9,3 +9,16 @@ class UserSerializer(serializers.ModelSerializer):
                 'write_only': True
             }
         }
+
+
+class ApplicantSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    class Meta:
+        model = Applicant
+        fields = '__all__'
+
+class EmployerSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    class Meta:
+        model = Employer
+        fields = '__all__'
