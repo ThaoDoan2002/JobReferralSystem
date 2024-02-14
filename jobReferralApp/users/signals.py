@@ -8,6 +8,7 @@ from django.conf import settings
 def createUser(sender, instance, created, **kwargs):
     if created:
         if instance.is_employer:
+            admin = User.objects.get(is_superuser=True)
             employer = Employer.objects.create(user=instance)
             employer.user.is_active = False
             employer.user.set_password(instance.password)
@@ -17,7 +18,7 @@ def createUser(sender, instance, created, **kwargs):
                 'Yêu cầu kích hoạt tài khoản mới',
                 f'Một nhà tuyển dụng đã đăng ký và yêu cầu kích hoạt tài khoản mới. Email: {instance.email}',
                 '2151013090thao@ou.edu.vn',
-                ['doanthithao20022003@gmail.com'], #admin
+                [admin.email], #admin
                 fail_silently=False,
             )
 
