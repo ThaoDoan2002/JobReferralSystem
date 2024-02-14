@@ -10,34 +10,37 @@ class BaseModel(models.Model):
         abstract = True
 
 
-class Recruitment(BaseModel):
+class RecruitmentPost(BaseModel):
     employer = models.ForeignKey(Employer, models.CASCADE)
     title = models.CharField(max_length=255)
-    #experience
+    experience = models.CharField(max_length=255)
     expirationDate = models.DateField()
     description = models.TextField()
     quantity = models.IntegerField()
     sex = models.CharField(max_length=50)
     workingForm = models.CharField(max_length=255)
-    # carrers = models.ForeignKey(Career, on_delete=models.RESTRICT, null=True) #nhớ sửa lại sau khi xong
-    # areas = models.ManyToManyField(Area)
+    carrer = models.CharField(max_length=255)
+    area = models.CharField(max_length=255)
+    wage = models.CharField(max_length=255)
+    position = models.CharField(max_length=255)
+
+
 
     def __str__(self):
         return self.title
 
     class Meta:
-        ordering = ['-created_date','updated_date']
+        ordering = ['-created_date']
 
 
 
 
 class JobApplication(BaseModel):
-    description = models.TextField(null=True)
-    jobPost = models.ForeignKey(Recruitment, models.RESTRICT) #luu tru thi khong nen cascade => RESTRICT
+    recruitment = models.ForeignKey(RecruitmentPost, models.RESTRICT, null=True) #luu tru thi khong nen cascade => RESTRICT
     applicant = models.ForeignKey(Applicant, models.RESTRICT)
-
+    cv = models.CharField(max_length=255, null=True) #tai file docx, pdf
     def __str__(self):
-        return self.job.title
+        return self.applicant.user.username + self.recruitment.title
 
 
 
