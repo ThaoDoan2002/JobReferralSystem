@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -158,5 +160,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CLIENT_ID = "LwIYI8rfaX0ttTLcR3z7KvMU9uv0QKyHBpKHnnHy"
-CLIENT_SECRET = "YZpwQxDUoo6KLkGyNsqcIiBn87CD7igJrBEHqbHRiPNHqisgS8OKTCZvXXb50BRn5GKunJCUCwECa3uz9QjBJ2C0BoR5XXZtSAZDNWbthxtc23eVWqzOKIphTrobaQ3X"
+CLIENT_ID = "25RnVPSyv2rxNIsg1WkTt2o2qq1lss1O94Ge7iiM"
+CLIENT_SECRET = "0m25PVil6xkyl5zAMQ7HvrmmnxHQhNwNIwngZsYLHfg0Foz32TVV7sVbPw8FqDjM2JYPWSHTohG4fNYWiv9SYPsTY4scK1AM0Lwx5R18rNlixeASh5433Oii724mkvBk"
+
+

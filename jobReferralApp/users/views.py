@@ -1,4 +1,4 @@
-from rest_framework import viewsets, generics, permissions, parsers
+from rest_framework import viewsets, generics, permissions, parsers, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -9,7 +9,7 @@ from users import perms
 
 # Create your views here.
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
-    queryset = User.objects.filter(is_active=True).all()
+    queryset = User.objects.filter(is_active=True)
     serializer_class = serializers.UserSerializer
     parser_classes = [parsers.MultiPartParser]
 
