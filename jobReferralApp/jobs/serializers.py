@@ -12,3 +12,5 @@ class RecruitmentSerializer(serializers.ModelSerializer):
 
 
 
+
+

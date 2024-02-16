@@ -14,27 +14,39 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     parser_classes = [parsers.MultiPartParser]
 
 
-    def get_permissions(self):
-        if self.action.__eq__('current_user'):
-            return [permissions.IsAuthenticated()]
-
-        return [permissions.AllowAny()]
-
-    @action(methods=['get'], url_name='current_user', detail=False)
-    def current_user(self, request):
-        #cac thong tin sau khi da chung thuc nam trong request.user
-        return Response(serializers.UserSerializer(request.user).data)
-
 
 class ApplicantViewSet(viewsets.ViewSet, generics.UpdateAPIView):
     queryset = Applicant.objects.all()
     serializer_class = serializers.ApplicantSerializer
-    permission_classes = [perms.OwnerAuthenticated]
+
+    def get_permissions(self):
+        if self.action.__eq__('current_applicant'):
+            return [permissions.IsAuthenticated()]
+        return [perms.OwnerAuthenticated()]
+
+    @action(methods=['get'], url_name='current_applicant', detail=False)
+    def current_applicant(self, request):
+        # cac thong tin sau khi da chung thuc nam trong request.user
+        return Response(serializers.ApplicantSerializer(request.user.applicant).data)
+
+
 
 
 class EmployerViewSet(viewsets.ViewSet, generics.UpdateAPIView):
     queryset = Employer.objects.all()
     serializer_class = serializers.EmployerSerializer
-    permission_classes = [perms.OwnerAuthenticated]
+
+    def get_permissions(self):
+        if self.action.__eq__('current_employer'):
+            return [permissions.IsAuthenticated()]
+        return [perms.OwnerAuthenticated()]
+
+    @action(methods=['get'], url_name='current_employer', detail=False)
+    def current_employer(self, request):
+        # cac thong tin sau khi da chung thuc nam trong request.user
+        return Response(serializers.EmployerSerializer(request.user.employer).data)
+
+
+
 
 

@@ -44,14 +44,16 @@ class RecruitmentViewSet(viewsets.ViewSet, generics.ListAPIView):
             r = RecruitmentPost.objects.create(employer=request.user.employer,
                                                title=request.data.get('title'),experience=request.data.get('experience'),expirationDate= datetime.strptime(request.data.get('expirationDate'), "%Y-%m-%d").date())
             return Response(serializers.RecruitmentSerializer(r).data,status=status.HTTP_201_CREATED)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['patch'], detail=True,url_path='update_recruitmentPost')
     def update_recruitmentPost(self,request,pk):
-        r = self.get_object()
-        serializer = self.get_serializer(r, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data,status=status.HTTP_200_OK)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
     @action(methods=['delete'], detail=True, url_path='delete_recruitmentPost')
     def delete_recruitmentPost(self,request,pk):
