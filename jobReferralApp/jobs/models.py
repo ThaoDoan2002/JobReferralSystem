@@ -1,6 +1,7 @@
 from django.db import models
 from users.models import Employer, Area, Applicant
 from django.utils import timezone
+from ckeditor.fields import RichTextField
 
 
 class BaseModel(models.Model):
@@ -17,7 +18,7 @@ class RecruitmentPost(BaseModel):
     title = models.CharField(max_length=255)
     experience = models.CharField(max_length=255)
     expirationDate = models.DateField()
-    description = models.TextField(null=True, blank=True, default="ABC")
+    description = RichTextField()
     quantity = models.IntegerField(null=True,default="1")
     sex = models.CharField(max_length=50,null=True,default="ABC")
     workingForm = models.CharField(max_length=255,null=True,default="ABC")

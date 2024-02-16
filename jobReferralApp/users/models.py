@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from cloudinary.models import CloudinaryField
+from ckeditor.fields import RichTextField
+
 
 class User (AbstractUser):
     avatar = CloudinaryField('avatar', null=True)
@@ -14,7 +16,7 @@ class Employer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     companyName = models.CharField(max_length=255,blank=True, null=True)
     position = models.CharField(max_length=255,blank=True, null=True)
-    information = models.TextField(blank=True, null=True)
+    information = RichTextField()
     address = models.CharField(max_length=255, blank=True, null=True)
     mediaLink = models.CharField(max_length=255,blank=True, null=True)
     companySize = models.IntegerField(blank=True, null=True)

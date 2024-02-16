@@ -55,7 +55,7 @@ class RecruitmentViewSet(viewsets.ViewSet, generics.ListAPIView):
         serializer.save()
         return Response(serializer.data)
 
-    @action(methods=['delete'], detail=True, url_path='delete_recruitmentPost')
+    @action(methods=['delete'], detail=True)
     def delete_recruitmentPost(self,request,pk):
             r = self.get_object()
             r.delete()

@@ -3,4 +3,4 @@ from .models import JobApplication, RecruitmentPost
 
 
 admin.site.register(JobApplication)
-admin.site.register(RecruitmentPost )
+admin.site.register(RecruitmentPost)
