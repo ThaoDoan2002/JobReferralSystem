@@ -16,7 +16,7 @@ class Employer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     companyName = models.CharField(max_length=255,blank=True, null=True)
     position = models.CharField(max_length=255,blank=True, null=True)
-    information = RichTextField()
+    information = RichTextField(null=True,blank=True)
     address = models.CharField(max_length=255, blank=True, null=True)
     mediaLink = models.CharField(max_length=255,blank=True, null=True)
     companySize = models.IntegerField(blank=True, null=True)
