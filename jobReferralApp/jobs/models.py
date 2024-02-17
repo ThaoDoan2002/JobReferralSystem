@@ -16,9 +16,9 @@ class BaseModel(models.Model):
 class RecruitmentPost(BaseModel):
     employer = models.ForeignKey(Employer, models.CASCADE)
     title = models.CharField(max_length=255)
-    experience = models.CharField(max_length=255)
+    experience = models.CharField(max_length=255,null=True,default="1 năm")
     expirationDate = models.DateField()
-    description = RichTextField()
+    description = RichTextField(null=True,blank=True,default="BCS")
     quantity = models.IntegerField(null=True,default="1")
     sex = models.CharField(max_length=50,null=True,default="ABC")
     workingForm = models.CharField(max_length=255,null=True,default="ABC")

@@ -17,6 +17,7 @@ class ApplicantSerializer(serializers.ModelSerializer):
         model = Applicant
         fields = '__all__'
 
+#Khi update employer đồng thời thay đổi thông tin cơ bản trong user
     def update(self, instance, validated_data):  # có thể sửa thông tin user bên trong employer instance
         user_data = validated_data.pop('user', {})  # Lấy dữ liệu của user từ validated_data
         user_instance = instance.user  # Lấy instance của user liên kết với Employer

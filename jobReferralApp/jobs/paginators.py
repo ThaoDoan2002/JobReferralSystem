@@ -1,4 +1,4 @@
 from rest_framework.pagination import PageNumberPagination
 
-class RecruitmentPaginator(PageNumberPagination):
+class RecruitmentPostPaginator(PageNumberPagination):
     page_size = 20

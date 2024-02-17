@@ -13,6 +13,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     serializer_class = serializers.UserSerializer
     parser_classes = [parsers.MultiPartParser]
 
+    #không tách current-user vì khi chỉ lấy mỗi user information, thì khi cần tới thông tin của employer hay applicant phải tốn thêm 1 query truy xuất, nếu thêm field method cho UserSerializer, thì sẽ rối 2 role
 
 
 class ApplicantViewSet(viewsets.ViewSet, generics.UpdateAPIView):
