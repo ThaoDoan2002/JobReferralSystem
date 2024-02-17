@@ -5,7 +5,7 @@ from ckeditor.fields import RichTextField
 
 
 class User (AbstractUser):
-    avatar = CloudinaryField('avatar', null=True)
+    avatar = CloudinaryField('avatar', null=True, blank=True)
     phoneNumber = models.CharField(max_length=255)
     is_employer = models.BooleanField(default=False)
     is_applicant = models.BooleanField(default=False)

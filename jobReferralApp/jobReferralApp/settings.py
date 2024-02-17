@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'cloudinary',
     'oauth2_provider',
     'ckeditor',
-    'ckeditor_uploader'
+    'ckeditor_uploader',
+    'django_filters'
 ]
 
 CKEDITOR_UPLOAD_PATH = "images/jobs/"
