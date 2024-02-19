@@ -5,7 +5,7 @@ from ckeditor.fields import RichTextField
 
 
 class User (AbstractUser):
-    avatar = CloudinaryField('avatar', null=True, blank=True)
+    avatar = CloudinaryField('avatar', null=True)
     phoneNumber = models.CharField(max_length=255)
     is_employer = models.BooleanField(default=False)
     is_applicant = models.BooleanField(default=False)
@@ -43,7 +43,6 @@ class Area(models.Model):
 
 class Applicant(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    career = models.CharField(max_length=255) #ngành nghề
     position = models.CharField(max_length=255) #vị trí công việc
     skills = models.ManyToManyField(Skill)
     areas = models.ManyToManyField(Area)
@@ -54,3 +53,10 @@ class Applicant(models.Model):
     def __str__(self):
         return self.user.username
 
+
+class Career (models.Model):
+    name = models.CharField(max_length=255, null=True)
+    applicant = models.ForeignKey(Applicant, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return self.name

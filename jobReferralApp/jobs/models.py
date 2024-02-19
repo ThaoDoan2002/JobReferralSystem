@@ -22,7 +22,6 @@ class RecruitmentPost(BaseModel):
     quantity = models.IntegerField(null=True,default="1")
     sex = models.CharField(max_length=50,null=True,default="ABC")
     workingForm = models.CharField(max_length=255,null=True,default="ABC")
-    carrer = models.CharField(max_length=255,null=True,default="ABC")
     area = models.CharField(max_length=255,null=True,default="ABC")
     wage = models.CharField(max_length=255,null=True,default="ABC")
     position = models.CharField(max_length=255,null=True,default="ABC")
@@ -34,6 +33,13 @@ class RecruitmentPost(BaseModel):
         unique_together = ('employer', 'title')
         ordering = ['-created_date']
 
+
+class Career (models.Model):
+    name = models.CharField(max_length=255, null=True)
+    post = models.ForeignKey(RecruitmentPost, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return self.name
 
 
 class JobApplication(BaseModel):

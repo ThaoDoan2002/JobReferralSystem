@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from users.models import User, Applicant, Employer
+from users.models import User, Applicant, Employer, Skill, Area
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -11,8 +11,20 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
 
+class SkillSerilizer(serializers.ModelSerializer):
+    class Meta:
+        model = Skill
+        fields = '__all__'
+
+class AreaSerilizer(serializers.ModelSerializer):
+    class Meta:
+        model = Area
+        fields = '__all__'
+
 class ApplicantSerializer(serializers.ModelSerializer):
     user = UserSerializer()
+    skills = SkillSerilizer(many=True)
+    areas = AreaSerilizer(many=True)
     class Meta:
         model = Applicant
         fields = '__all__'

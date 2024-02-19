@@ -1,10 +1,12 @@
 from rest_framework import viewsets, generics, permissions, parsers, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 
 from users.models import User,Applicant, Employer
 from users import serializers
 from users import perms
+from users import filters
 
 
 # Create your views here.
@@ -13,22 +15,39 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     serializer_class = serializers.UserSerializer
     parser_classes = [parsers.MultiPartParser]
 
+    def get_permissions(self):
+        if self.action.__eq__('curent_user'):
+            return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
+
+
+    @action(methods=['get'], detail=False)
+    def current_user(self, request):
+        # cac thong tin sau khi da chung thuc nam trong request.user
+        if request.user.is_applicant:
+            return Response(serializers.ApplicantSerializer(request.user.applicant).data)
+        elif request.user.is_employer:
+            return Response(serializers.EmployerSerializer(request.user.employer).data)
+
     #không tách current-user vì khi chỉ lấy mỗi user information, thì khi cần tới thông tin của employer hay applicant phải tốn thêm 1 query truy xuất, nếu thêm field method cho UserSerializer, thì sẽ rối 2 role
 
 
-class ApplicantViewSet(viewsets.ViewSet, generics.UpdateAPIView):
+class ApplicantViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.ListAPIView):
     queryset = Applicant.objects.all()
     serializer_class = serializers.ApplicantSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = filters.ApplicantFilter
+    
 
     def get_permissions(self):
-        if self.action.__eq__('current_applicant'):
-            return [permissions.IsAuthenticated()]
-        return [perms.OwnerAuthenticated()]
+        if self.action in ['update', 'partial_update']:
+            return [perms.AppOwnerAuthenticated()]
+        return [permissions.AllowAny()]
 
-    @action(methods=['get'], url_name='current_applicant', detail=False)
-    def current_applicant(self, request):
-        # cac thong tin sau khi da chung thuc nam trong request.user
-        return Response(serializers.ApplicantSerializer(request.user.applicant).data)
+    # @action(methods=['get'], detail=False)
+    # def search_applicant(self,request):
+    #     q = self.filter_queryset(self.get_queryset())
+    #     return Response(serializers.ApplicantSerializer(q,many=True).data, status=status.HTTP_200_OK)
 
 
 
@@ -38,14 +57,15 @@ class EmployerViewSet(viewsets.ViewSet, generics.UpdateAPIView):
     serializer_class = serializers.EmployerSerializer
 
     def get_permissions(self):
-        if self.action.__eq__('current_employer'):
-            return [permissions.IsAuthenticated()]
-        return [perms.OwnerAuthenticated()]
+        if self.action in ['update', 'partial_update']:
+            return [perms.EmOwnerAuthenticated()]
+        else:
+            return [permissions.AllowAny()]
 
-    @action(methods=['get'], url_name='current_employer', detail=False)
-    def current_employer(self, request):
-        # cac thong tin sau khi da chung thuc nam trong request.user
-        return Response(serializers.EmployerSerializer(request.user.employer).data)
+
+
+
+
 
 
 

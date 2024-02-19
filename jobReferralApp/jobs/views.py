@@ -33,10 +33,10 @@ class RecruitmentPostViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Up
     def get_permissions(self):
         if self.action.__eq__('create_post'):
             # Cho phép người dùng đã xác thực tạo mới (POST)
-            return [permissions.IsAuthenticated()]
+            return [perms.EmIsAuthenticated()]
         elif self.action in ['update', 'partial_update', 'destroy']:
             # Chỉ cho phép chủ sở hữu cập nhật (PUT, PATCH, DELETE)
-            return [permissions.IsAuthenticated(), perms.OwnerAuthenticated()]
+            return [perms.OwnerAuthenticated()]
         else:
             # Mặc định, cho phép tất cả các hành động khác
             return [permissions.AllowAny()]
