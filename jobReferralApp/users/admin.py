@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Employer, Applicant, Skill, Area
+from .models import User, Employer, Applicant, Skill, Area, Career
 
 class UserAdmin (admin.ModelAdmin):
     list_display = ['id', 'username']
@@ -15,3 +15,4 @@ admin.site.register(Employer)
 admin.site.register(Applicant, ApplicantAdmin)
 admin.site.register(Skill)
 admin.site.register(Area)
+admin.site.register(Career)

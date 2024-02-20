@@ -1,6 +1,5 @@
 from django.db import models
-from users.models import Employer, Area, Applicant
-from django.utils import timezone
+from users.models import Employer, Area, Applicant, Career
 from ckeditor.fields import RichTextField
 
 
@@ -25,6 +24,7 @@ class RecruitmentPost(BaseModel):
     area = models.CharField(max_length=255,null=True,default="ABC")
     wage = models.CharField(max_length=255,null=True,default="ABC")
     position = models.CharField(max_length=255,null=True,default="ABC")
+    career = models.ForeignKey(Career, on_delete=models.RESTRICT, null=True, blank=True)
 
     def __str__(self):
         return self.title
@@ -33,13 +33,6 @@ class RecruitmentPost(BaseModel):
         unique_together = ('employer', 'title')
         ordering = ['-created_date']
 
-
-class Career (models.Model):
-    name = models.CharField(max_length=255, null=True)
-    post = models.ForeignKey(RecruitmentPost, on_delete=models.SET_NULL, null=True)
-
-    def __str__(self):
-        return self.name
 
 
 class JobApplication(BaseModel):

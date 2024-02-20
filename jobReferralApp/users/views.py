@@ -2,11 +2,13 @@ from rest_framework import viewsets, generics, permissions, parsers, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 
 from users.models import User,Applicant, Employer
 from users import serializers
 from users import perms
 from users import filters
+
 
 
 # Create your views here.
@@ -35,9 +37,9 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
 class ApplicantViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.ListAPIView):
     queryset = Applicant.objects.all()
     serializer_class = serializers.ApplicantSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend,SearchFilter]
     filterset_class = filters.ApplicantFilter
-    
+
 
     def get_permissions(self):
         if self.action in ['update', 'partial_update']:

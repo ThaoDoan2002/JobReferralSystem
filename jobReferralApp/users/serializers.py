@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from users.models import User, Applicant, Employer, Skill, Area
+from users.models import User, Applicant, Employer, Skill, Area, Career
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -21,22 +21,57 @@ class AreaSerilizer(serializers.ModelSerializer):
         model = Area
         fields = '__all__'
 
+class CareerSerilizer(serializers.ModelSerializer):
+    class Meta:
+        model = Career
+        fields = '__all__'
+
 class ApplicantSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     skills = SkillSerilizer(many=True)
     areas = AreaSerilizer(many=True)
+    career = CareerSerilizer()
     class Meta:
         model = Applicant
         fields = '__all__'
 
 #Khi update employer đồng thời thay đổi thông tin cơ bản trong user
-    def update(self, instance, validated_data):  # có thể sửa thông tin user bên trong employer instance
-        user_data = validated_data.pop('user', {})  # Lấy dữ liệu của user từ validated_data
-        user_instance = instance.user  # Lấy instance của user liên kết với Employer
+    def update(self, instance, validated_data):
+        # Cập nhật thông tin của user nếu có
+        user_data = validated_data.pop('user', {})
+        user_instance = instance.user
         for attr, value in user_data.items():
-            setattr(user_instance, attr, value)  # Cập nhật giá trị mới cho các trường của user
-        user_instance.save()  # Lưu lại các thay đổi vào database
-        return super().update(instance, validated_data)  # Gọi phương thức update của ModelSerializer
+            setattr(user_instance, attr, value)
+        user_instance.save()
+
+        # Cập nhật thông tin của Employer
+        instance.position = validated_data.get("position", instance.position)
+        instance.wage = validated_data.get("wage", instance.wage)
+        instance.experience = validated_data.get("experience", instance.experience)
+        # Cập nhật các trường khác tùy theo yêu cầu
+
+        # Lưu lại instance Employer đã cập nhật
+        instance.save()
+
+        # Lấy ra danh sách kỹ năng mới từ validated_data
+        skills_data = validated_data.pop("skills", [])
+        # Xóa hết các kỹ năng cũ của Employer
+        instance.skills.clear()
+        # Thêm kỹ năng mới
+        for skill_data in skills_data:
+            skill, created = Skill.objects.get_or_create(**skill_data)
+            instance.skills.add(skill)
+
+        # Lấy ra danh sách khu vực mới từ validated_data
+        areas_data = validated_data.pop("areas", [])
+        # Xóa hết các khu vực cũ của Employer
+        instance.areas.clear()
+        # Thêm khu vực mới
+        for area_data in areas_data:
+            area, created = Area.objects.get_or_create(**area_data)
+            instance.areas.add(area)
+
+        return super().update(instance, validated_data)
 
 class EmployerSerializer(serializers.ModelSerializer):
     user = UserSerializer()

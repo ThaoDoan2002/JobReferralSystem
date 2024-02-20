@@ -12,8 +12,6 @@ from rest_framework.decorators import action
 from jobs import perms
 
 
-
-
 # Create your views here.
 class RecruitmentPostViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
     queryset = RecruitmentPost.objects.filter(active=True)
@@ -43,8 +41,17 @@ class RecruitmentPostViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Up
 
     @action(methods=['post'], detail=False)
     def create_post(self, request):
-        p = RecruitmentPost.objects.create(employer=request.user.employer, title=request.data.get('title'),expirationDate= datetime.strptime(request.data.get('expirationDate'), "%Y-%m-%d").date())
+        p = RecruitmentPost.objects.create(employer=request.user.employer,
+                                           title=request.data.get('title'),
+                                           expirationDate=datetime.strptime(request.data.get('expirationDate'),
+                                                                            "%Y-%m-%d").date(),
+                                           experience=request.data.get('experience'),
+                                           description=request.data.get('description'),
+                                           quantity=request.data.get('quantity'),
+                                           sex=request.data.get('sex'),
+                                           workingForm=request.data.get('workingForm'),
+                                           area=request.data.get('area'),
+                                           wage=request.data.get('wage'),
+                                           position=request.data.get('position'),
+                                           career=request.data.get('career'))
         return Response(serializers.RecruitmentPostSerializer(p).data, status=status.HTTP_201_CREATED)
-
-
-
