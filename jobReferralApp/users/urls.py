@@ -6,6 +6,10 @@ router = routers.DefaultRouter()
 router.register('users', views.UserViewSet, basename='users')
 router.register('applicants', views.ApplicantViewSet, basename='applicants')
 router.register('employers', views.EmployerViewSet, basename='employers')
+router.register('skills', views.SkillViewSet, basename='skills')
+router.register('areas', views.AreaViewSet, basename='areas')
+router.register('careers', views.CareerViewSet, basename='careers')
+
 
 urlpatterns = [
     path('', include(router.urls))

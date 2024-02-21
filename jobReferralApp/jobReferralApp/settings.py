@@ -116,6 +116,8 @@ AUTH_USER_MODEL = 'users.User'
 
 # noi upload anh
 MEDIA_ROOT = '%s/users/static/' % BASE_DIR
+CKEDITOR_UPLOAD_PATH = "ckeditor/images/"
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

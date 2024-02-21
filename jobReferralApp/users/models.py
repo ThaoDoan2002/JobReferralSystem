@@ -6,7 +6,8 @@ from ckeditor.fields import RichTextField
 
 
 class User (AbstractUser):
-    avatar = CloudinaryField('avatar', null=True)
+    avatar = CloudinaryField('avatar', null=True,blank=True)
+    image =models.ImageField(upload_to='users/%Y/%m', null=True)
     phoneNumber = models.CharField(max_length=255)
     is_employer = models.BooleanField(default=False)
     is_applicant = models.BooleanField(default=False)
@@ -57,6 +58,7 @@ class Applicant(models.Model):
     experience = models.CharField(max_length=255) #kinh nghiệm theo năm
     wage = models.CharField(max_length=255) #lương mong muốn
     career = models.ForeignKey(Career, on_delete=models.RESTRICT, null=True, blank=True)
+    cv = models.FileField(upload_to='users/cv', null=True)
 
     def __str__(self):
         return self.user.username

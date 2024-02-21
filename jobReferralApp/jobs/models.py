@@ -4,8 +4,8 @@ from ckeditor.fields import RichTextField
 
 
 class BaseModel(models.Model):
-    created_date = models.DateTimeField(auto_now_add=True, null=True)
-    updated_date = models.DateTimeField(auto_now=True, null=True)
+    created_date = models.DateField(auto_now_add=True, null=True)
+    updated_date = models.DateField(auto_now=True, null=True)
     active = models.BooleanField(default=True)
 
     class Meta:
@@ -16,7 +16,7 @@ class RecruitmentPost(BaseModel):
     employer = models.ForeignKey(Employer, models.CASCADE)
     title = models.CharField(max_length=255)
     experience = models.CharField(max_length=255,null=True,default="1 năm")
-    expirationDate = models.DateField()
+    expirationDate = models.DateField(null=True, blank=True)
     description = RichTextField(null=True,blank=True,default="BCS")
     quantity = models.IntegerField(null=True,default="1")
     sex = models.CharField(max_length=50,null=True,default="ABC")
@@ -38,7 +38,7 @@ class RecruitmentPost(BaseModel):
 class JobApplication(BaseModel):
     recruitment = models.ForeignKey(RecruitmentPost, models.RESTRICT, null=True)  # luu tru thi khong nen cascade => RESTRICT
     applicant = models.ForeignKey(Applicant, models.RESTRICT)
-    cv = models.CharField(max_length=255, null=True)  # tai file docx, pdf
+
 
     class Meta:
         unique_together = ('recruitment', 'applicant')

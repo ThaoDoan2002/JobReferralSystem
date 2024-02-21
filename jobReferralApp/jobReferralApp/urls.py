@@ -49,4 +49,5 @@ urlpatterns = [
             name='schema-redoc'),
     re_path(r'^ckeditor/',
             include('ckeditor_uploader.urls')),
+
 ]

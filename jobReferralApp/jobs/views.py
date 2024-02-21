@@ -5,6 +5,7 @@ from rest_framework import viewsets, generics, status, permissions
 from rest_framework.response import Response
 
 from jobs.models import RecruitmentPost
+from users.models import Career
 from jobs import serializers
 from jobs import paginators
 from django.utils import timezone
@@ -41,6 +42,9 @@ class RecruitmentPostViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Up
 
     @action(methods=['post'], detail=False)
     def create_post(self, request):
+        career_data = request.data.get('career')
+        career_id = career_data.get('id')
+        career = Career.objects.get(id=career_id)
         p = RecruitmentPost.objects.create(employer=request.user.employer,
                                            title=request.data.get('title'),
                                            expirationDate=datetime.strptime(request.data.get('expirationDate'),
@@ -53,5 +57,5 @@ class RecruitmentPostViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Up
                                            area=request.data.get('area'),
                                            wage=request.data.get('wage'),
                                            position=request.data.get('position'),
-                                           career=request.data.get('career'))
+                                           career=career)
         return Response(serializers.RecruitmentPostSerializer(p).data, status=status.HTTP_201_CREATED)
