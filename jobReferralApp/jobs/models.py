@@ -45,3 +45,26 @@ class JobApplication(BaseModel):
 
     def __str__(self):
         return self.recruitment.title + ", " + self.applicant.user.username + " apply"
+
+
+class Interaction(BaseModel):
+    user = models.ForeignKey(Applicant, on_delete=models.CASCADE, null=False)
+    lesson = models.ForeignKey(RecruitmentPost, on_delete=models.CASCADE, null=False)
+
+    class Meta:
+        abstract = True
+
+
+class Comment(Interaction):
+    content = models.CharField(max_length=255, null=False)
+
+
+class Like(Interaction):
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ('user', 'lesson')
+
+
+class Rating(Interaction):
+    rate = models.SmallIntegerField(default=0)
