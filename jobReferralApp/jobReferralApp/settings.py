@@ -38,12 +38,13 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'jobs.apps.JobsConfig',
     'rest_framework',
-    'drf_yasg',
     'cloudinary',
     'oauth2_provider',
     'ckeditor',
     'ckeditor_uploader',
-    'django_filters'
+    'django_filters',
+    'drf_yasg',
+
 ]
 
 CKEDITOR_UPLOAD_PATH = "images/jobs/"
@@ -54,13 +55,20 @@ REST_FRAMEWORK = {
     )
 }
 
-import cloudinary
+# import cloudinary
+#
+# cloudinary.config(
+#     cloud_name="dzrgeifj0",
+#     api_key="379262584825783",
+#     api_secret="Jfur6eOyJ9gMBbbdM9nwBGKoL4E"
+# )
 
-cloudinary.config(
-    cloud_name="dzrgeifj0",
-    api_key="379262584825783",
-    api_secret="Jfur6eOyJ9gMBbbdM9nwBGKoL4E"
-)
+CLOUDINARY = {
+      'cloud_name': 'dzrgeifj0',
+      'api_key': '379262584825783',
+      'api_secret': 'Jfur6eOyJ9gMBbbdM9nwBGKoL4E',
+      'api_proxy': 'http://proxy.server:3128'
+}
 
 MAILCHIMP_API_KEY = 'e4bc513bb8a430403af5f826dba47590-us17'
 MAILCHIMP_LIST_ID = '6c0097fbaa'
@@ -118,7 +126,6 @@ AUTH_USER_MODEL = 'users.User'
 MEDIA_ROOT = '%s/users/static/' % BASE_DIR
 CKEDITOR_UPLOAD_PATH = "ckeditor/images/"
 
-
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
@@ -168,7 +175,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CLIENT_ID = "5NScGJpmf2F1es7gE7dcv9DqKjADI2vaTlF4yUbJ"
 CLIENT_SECRET = "gMGgwEzq0C5TIq7pHGcV31DgoOBlwOU4123DmlipSnYnQuYi0LXmKYMpJVVDjQCPirV2o3lwodAs6n9z0mQqEKbWWB7BdBq1QC88o46Dyc53qdFAFlzERSDo3Cwgv7lh"
 
-#gửi dữ liệu json
+# gửi dữ liệu json
 OAUTH2_PROVIDER = {
     'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore'
 }

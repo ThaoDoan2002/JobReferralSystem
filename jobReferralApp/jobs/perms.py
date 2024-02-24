@@ -9,3 +9,9 @@ class EmIsAuthenticated(permissions.IsAuthenticated):
             return bool(request.user.employer and request.user.is_authenticated)
 
 
+class AppIsAuthenticated(permissions.IsAuthenticated):
+        def has_permission(self, request, view):
+            return bool(request.user.applicant and request.user.is_authenticated)
+
+
+

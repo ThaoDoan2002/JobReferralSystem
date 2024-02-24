@@ -20,20 +20,21 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
+from jobs.admin import admin_site
+
 schema_view = get_schema_view(
     openapi.Info(
-        title="Job Referral API",
+        title="JobReferral API",
         default_version='v1',
         description="APIs for JobReferralApp",
-        contact=openapi.Contact(email="2151013090thao@ou.edu.vn"),
+        contact=openapi.Contact(email="doanthithao20022003@gmail.com"),
         license=openapi.License(name="Đoàn Thị Thảo@2024"),
     ),
     public=True,
-    permission_classes=(permissions.AllowAny,),
-)
+    permission_classes=(permissions.AllowAny,))
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', admin_site .urls),
     path('', include('jobs.urls')),
     path('', include('users.urls')),
     path('o/', include('oauth2_provider.urls',
@@ -47,6 +48,7 @@ urlpatterns = [
     re_path(r'^redoc/$',
             schema_view.with_ui('redoc', cache_timeout=0),
             name='schema-redoc'),
+
     re_path(r'^ckeditor/',
             include('ckeditor_uploader.urls')),
 

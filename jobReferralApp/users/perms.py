@@ -4,6 +4,10 @@ class AppOwnerAuthenticated(permissions.IsAuthenticated):
     def has_object_permission(self, request, view, obj):
         return self.has_permission(request, view) and request.user.applicant == obj
 
+class AppOwnerCmtAuthenticated(permissions.IsAuthenticated):
+    def has_object_permission(self, request, view, obj):
+        return self.has_permission(request, view) and request.user.applicant == obj.applicant
+
 
 class AppIsAuthenticated(permissions.IsAuthenticated):
         def has_permission(self, request, view):

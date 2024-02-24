@@ -4,8 +4,8 @@ from ckeditor.fields import RichTextField
 
 
 class BaseModel(models.Model):
-    created_date = models.DateField(auto_now_add=True, null=True)
-    updated_date = models.DateField(auto_now=True, null=True)
+    created_date = models.DateTimeField(auto_now_add=True, null=True)
+    updated_date = models.DateTimeField(auto_now=True, null=True)
     active = models.BooleanField(default=True)
 
     class Meta:
@@ -16,7 +16,7 @@ class RecruitmentPost(BaseModel):
     employer = models.ForeignKey(Employer, models.CASCADE)
     title = models.CharField(max_length=255)
     experience = models.CharField(max_length=255,null=True,default="1 năm")
-    expirationDate = models.DateField(null=True, blank=True)
+    expirationDate = models.DateField(null=True, blank=True, default="2025-01-20")
     description = RichTextField(null=True,blank=True,default="BCS")
     quantity = models.IntegerField(null=True,default="1")
     sex = models.CharField(max_length=50,null=True,default="ABC")
@@ -36,9 +36,9 @@ class RecruitmentPost(BaseModel):
 
 
 class JobApplication(BaseModel):
-    recruitment = models.ForeignKey(RecruitmentPost, models.RESTRICT, null=True)  # luu tru thi khong nen cascade => RESTRICT
+    recruitment = models.ForeignKey(RecruitmentPost, models.RESTRICT, null=Trues)  # luu tru thi khong nen cascade => RESTRICT
     applicant = models.ForeignKey(Applicant, models.RESTRICT)
-
+    coverLetter = models.CharField(max_length=255, null=True,blank=True)
 
     class Meta:
         unique_together = ('recruitment', 'applicant')
@@ -47,24 +47,3 @@ class JobApplication(BaseModel):
         return self.recruitment.title + ", " + self.applicant.user.username + " apply"
 
 
-class Interaction(BaseModel):
-    user = models.ForeignKey(Applicant, on_delete=models.CASCADE, null=False)
-    lesson = models.ForeignKey(RecruitmentPost, on_delete=models.CASCADE, null=False)
-
-    class Meta:
-        abstract = True
-
-
-class Comment(Interaction):
-    content = models.CharField(max_length=255, null=False)
-
-
-class Like(Interaction):
-    active = models.BooleanField(default=True)
-
-    class Meta:
-        unique_together = ('user', 'lesson')
-
-
-class Rating(Interaction):
-    rate = models.SmallIntegerField(default=0)

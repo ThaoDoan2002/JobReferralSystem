@@ -6,12 +6,12 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 
-from users.models import User,Applicant, Employer, Skill, Area, Career
+from users.models import User, Applicant, Employer, Skill, Area, Career, Comment, Like, Rating
 from users import serializers
+from jobs.serializers import RecruitmentPostSerializer
 from users import perms
 from users import filters
-from users import paginators
-
+from jobs.models import RecruitmentPost
 
 
 # Create your views here.
@@ -21,10 +21,9 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     parser_classes = [parsers.MultiPartParser]
 
     def get_permissions(self):
-        if self.action.__eq__('curent_user'):
+        if self.action.__eq__('current_user'):
             return [permissions.IsAuthenticated()]
         return [permissions.AllowAny()]
-
 
     @action(methods=['get'], detail=False)
     def current_user(self, request):
@@ -33,49 +32,142 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
             return Response(serializers.ApplicantSerializer(request.user.applicant, context={'request': request}).data)
         elif request.user.is_employer:
             return Response(serializers.EmployerSerializer(request.user.employer, context={'request': request}).data)
+        elif request.user.is_superuser:
+            return Response(serializers.UserSerializer(request.user).data, status=status.HTTP_200_OK)
 
-    #không tách current-user vì khi chỉ lấy mỗi user information, thì khi cần tới thông tin của employer hay applicant phải tốn thêm 1 query truy xuất, nếu thêm field method cho UserSerializer, thì sẽ rối 2 role
 
-
-class ApplicantViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.ListAPIView):
+class ApplicantViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Applicant.objects.all()
     serializer_class = serializers.ApplicantSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = filters.ApplicantFilter
-    pagination_class = paginators.ApplicantPaginator
 
     def get_permissions(self):
         if self.action in ['update', 'partial_update']:
             return [perms.AppOwnerAuthenticated()]
-        return  [permissions.AllowAny()]
-        # if self.action.__eq__('get'):
-        #     return [perms.EmIsAuthenticated()]
-
-    # @action(methods=['get'], detail=False)
-    # def search_applicant(self,request):
-    #     q = self.filter_queryset(self.get_queryset())
-    #     return Response(serializers.ApplicantSerializer(q,many=True).data, status=status.HTTP_200_OK)
+        elif self.action in ['search_applicant', 'filter_applicant']:
+            return [perms.EmIsAuthenticated()]
+        elif self.action.__eq__('suggest_Job'):
+            return [perms.AppIsAuthenticated()]
+        return [permissions.AllowAny()]
 
     @action(methods=['get'], detail=False)
-    def searchApplicant(self, request):
-        q = self.request.query_params.get("q")
+    def search_applicant(self, request):
+        q = request.query_params.get("q")
 
         if q:
             skills = Skill.objects.filter(name__icontains=q)
             areas = Area.objects.filter(name__icontains=q)
             careers = Career.objects.filter(name__icontains=q)
 
-            applicants = Applicant.objects.distinct().filter(Q(skills__in=skills)|Q(areas__in=areas)|Q(career__in =careers))
+            applicants = Applicant.objects.distinct().filter(
+                Q(skills__in=skills) | Q(areas__in=areas) | Q(career__in=careers))
 
             if applicants:
-                page = self.paginate_queryset(applicants)  # Phân trang dựa trên cấu hình trong pagination_class
-                serializer = serializers.ApplicantSerializer(page, many=True)
-                return self.get_paginated_response(serializer.data)
-
+                return Response(serializers.ApplicantSerializer(applicants, many=True).data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
+    @action(detail=False, methods=['get'])
+    def filter_applicant(self, request):
+        # Lấy queryset đã được lọc
+        queryset = self.filter_queryset(self.get_queryset())
+        return Response(serializers.ApplicantSerializer(queryset, many=True).data, status=status.HTTP_200_OK)
 
+    @action(methods=['patch'], detail=True)
+    def update_applicant(self, request, pk):
+        applicant = self.get_object()
+        if request.data.get("career"):
+            career = Career.objects.get(name__iexact=request.data.get("career"))
+            data_to_update = {
+                'position': request.data.get('position', applicant.position),
+                'experience': request.data.get('experience', applicant.experience),
+                'wage': request.data.get('wage', applicant.wage),
+                'cv': request.data.get('cv', applicant.cv),
+                'career': {
+                    "id": career.id,
+                    "name": career.name
+                }
+            }
+            if request.data.get('skills'):
+                skills_data = request.data.get('skills')
 
+                if skills_data:
+                    # Xóa tất cả các kỹ năng hiện có của applicant
+                    applicant.skills.clear()
+
+                    # Lặp qua danh sách các kỹ năng mới và thêm chúng vào applicant
+                    for skill_name in skills_data:
+                        # Kiểm tra xem kỹ năng đã tồn tại trong DB chưa
+                        skill, created = Skill.objects.get_or_create(name=skill_name)
+                        # Thêm kỹ năng vào danh sách kỹ năng của applicant
+                        applicant.skills.add(skill)
+            if request.data.get('areas'):
+                areas_data = request.data.get('areas')
+
+                if areas_data:
+                    # Xóa tất cả các kỹ năng hiện có của applicant
+                    applicant.areas.clear()
+
+                    # Lặp qua danh sách các kỹ năng mới và thêm chúng vào applicant
+                    for area_name in areas_data:
+                        # Kiểm tra xem kỹ năng đã tồn tại trong DB chưa
+                        area, created = Area.objects.get_or_create(name=area_name)
+                        # Thêm kỹ năng vào danh sách kỹ năng của applicant
+                        applicant.areas.add(area)
+            serializer = serializers.ApplicantSerializer(applicant, data=data_to_update, partial=True)
+        elif request.data.get("career") is None:
+            data_to_update = {
+                'position': request.data.get('position', applicant.position),
+                'experience': request.data.get('experience', applicant.experience),
+                'wage': request.data.get('wage', applicant.wage),
+                'cv': request.data.get('cv', applicant.cv),
+            }
+            if request.data.get('skills'):
+                skills_data = request.data.get('skills')
+
+                if skills_data:
+                    # Xóa tất cả các kỹ năng hiện có của applicant
+                    applicant.skills.clear()
+
+                    # Lặp qua danh sách các kỹ năng mới và thêm chúng vào applicant
+                    for skill_name in skills_data:
+                        # Kiểm tra xem kỹ năng đã tồn tại trong DB chưa
+                        skill, created = Skill.objects.get_or_create(name=skill_name)
+                        # Thêm kỹ năng vào danh sách kỹ năng của applicant
+                        applicant.skills.add(skill)
+            if request.data.get('areas'):
+                areas_data = request.data.get('areas')
+
+                if areas_data:
+                    # Xóa tất cả các kỹ năng hiện có của applicant
+                    applicant.areas.clear()
+
+                    # Lặp qua danh sách các kỹ năng mới và thêm chúng vào applicant
+                    for area_name in areas_data:
+                        # Kiểm tra xem kỹ năng đã tồn tại trong DB chưa
+                        area, created = Area.objects.get_or_create(name=area_name)
+                        # Thêm kỹ năng vào danh sách kỹ năng của applicant
+                        applicant.areas.add(area)
+            serializer = serializers.ApplicantSerializer(applicant, data=data_to_update, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            updated_data = serializer.data  # Get serialized data
+            return Response(updated_data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=['get'], detail=False)
+    def suggest_Job(self, request):
+        applicant = request.user.applicant
+        # thieu workingform
+        applicant_areas = applicant.areas.values_list('name', flat=True)
+        posts = RecruitmentPost.objects.filter(experience__icontains=applicant.experience,
+                                               sex__icontains=applicant.user.sex,
+                                               area__in=applicant_areas,
+                                               wage__icontains=applicant.wage,
+                                               position__icontains=applicant.position,
+                                               career=applicant.career
+                                               )
+        return Response(RecruitmentPostSerializer(posts, many=True).data, status=status.HTTP_200_OK)
 
 
 class EmployerViewSet(viewsets.ViewSet, generics.UpdateAPIView):
@@ -85,29 +177,71 @@ class EmployerViewSet(viewsets.ViewSet, generics.UpdateAPIView):
     def get_permissions(self):
         if self.action in ['update', 'partial_update']:
             return [perms.EmOwnerAuthenticated()]
-        else:
-            return [permissions.AllowAny()]
+        elif self.action in ('search_employer', 'like', 'add_comment'):
+            return [perms.AppIsAuthenticated()]
+        return [permissions.AllowAny()]
+
+    @action(methods=['get'], detail=True)
+    def get_posts(self, request, pk):
+        employer = self.get_object()
+        posts = RecruitmentPost.objects.filter(employer=employer)
+        return Response(RecruitmentPostSerializer(posts, many=True).data, status=status.HTTP_200_OK)
+
+    @action(methods=['get'], detail=False)
+    def search_employer(self, request):
+        q = request.query_params.get("q")
+        if q:
+            employer = Employer.objects.get(companyName__icontains=q)
+            if employer:
+                return Response(serializers.EmployerSerializer(employer).data, status=status.HTTP_200_OK)
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=['post'], detail=True, url_path='comments')
+    def add_comment(self, request, pk):
+        c = Comment.objects.create(applicant=request.user.applicant, employer=self.get_object(),
+                                   content=request.data.get('content'))
+        return Response(serializers.CommentSerializer(c).data, status=status.HTTP_201_CREATED)
+
+    @action(methods=['post'], detail=True)
+    def like(self, request, pk):
+        like, created = Like.objects.get_or_create(applicant=request.user.applicant, employer=self.get_object())
+        if not created:
+            like.active = not like.active
+            like.save()
+
+        return Response(serializers.EmployerDetailSerializer(self.get_object(), context={'request': request}).data,
+                        status=status.HTTP_200_OK)
+
+    @action(methods=['post'], detail=True, url_path='rating')
+    def add_rating(self, request, pk):
+        rating = Rating.objects.create(applicant=request.user.applicant, employer=self.get_object(),
+                                       rate=request.data.get('rate'))
+        return Response(serializers.RatingSerializer(rating).data,status=status.HTTP_201_CREATED)
+
+
+class RatingViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAPIView):
+        queryset = Rating.objects.all()
+        serializer_class = serializers.RatingSerializer
+        permission_classes = [perms.AppOwnerCmtAuthenticated]
+
+
+class CommentViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = serializers.CommentSerializer
+    permission_classes = [perms.AppOwnerCmtAuthenticated]
 
 
 class SkillViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Skill.objects.all()
     serializer_class = serializers.SkillSerilizer
 
+
 class AreaViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Area.objects.all()
     serializer_class = serializers.AreaSerilizer
 
+
 class CareerViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Career.objects.all()
     serializer_class = serializers.CareerSerilizer
-
-
-
-
-
-
-
-
-
-
-

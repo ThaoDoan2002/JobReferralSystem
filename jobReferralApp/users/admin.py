@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
-from .models import User, Employer, Applicant, Skill, Area, Career
+from .models import User, Employer, Applicant, Skill, Area, Career, Comment, Like,Rating
 from ckeditor_uploader.widgets \
     import CKEditorUploadingWidget
 from django import forms
@@ -22,15 +22,6 @@ class EmployerAdmin(admin.ModelAdmin):
 class UserAdmin(admin.ModelAdmin):
     list_display = ['id', 'username']
 
-    readonly_fields = ['img']
-
-    def img(self, user):
-        if user:
-            return mark_safe(
-                '<img src="/static/{url}" width="120" />' \
-                    .format(url=user.image.name)
-            )
-
 
 class ApplicantAdmin(admin.ModelAdmin):
     list_display = ['id', 'user']
@@ -43,3 +34,6 @@ admin.site.register(Applicant, ApplicantAdmin)
 admin.site.register(Skill)
 admin.site.register(Area)
 admin.site.register(Career)
+admin.site.register(Comment)
+admin.site.register(Like)
+admin.site.register(Rating)
