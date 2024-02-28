@@ -1,17 +1,20 @@
-from django.core.paginator import Paginator
+import random
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.db.models import Q
 from rest_framework import viewsets, generics, permissions, parsers, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter
-
 from users.models import User, Applicant, Employer, Skill, Area, Career, Comment, Like, Rating
 from users import serializers
 from jobs.serializers import RecruitmentPostSerializer
 from users import perms
 from users import filters
 from jobs.models import RecruitmentPost
+
+from users.serializers import PasswordResetSerializer
 
 
 # Create your views here.
@@ -36,7 +39,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
             return Response(serializers.UserSerializer(request.user).data, status=status.HTTP_200_OK)
 
 
-class ApplicantViewSet(viewsets.ViewSet, generics.ListAPIView):
+class ApplicantViewSet(viewsets.ViewSet,generics.RetrieveAPIView, generics.ListAPIView):
     queryset = Applicant.objects.all()
     serializer_class = serializers.ApplicantSerializer
     filter_backends = [DjangoFilterBackend]
@@ -179,23 +182,29 @@ class EmployerViewSet(viewsets.ViewSet, generics.UpdateAPIView):
             return [perms.EmOwnerAuthenticated()]
         elif self.action in ('search_employer', 'like', 'add_comment'):
             return [perms.AppIsAuthenticated()]
+        elif self.action.__eq__('get_posts'):
+            return [perms.EmIsAuthenticated()]
         return [permissions.AllowAny()]
 
     @action(methods=['get'], detail=True)
-    def get_posts(self, request, pk):
-        employer = self.get_object()
-        posts = RecruitmentPost.objects.filter(employer=employer)
-        return Response(RecruitmentPostSerializer(posts, many=True).data, status=status.HTTP_200_OK)
+    def get_employer(self,request,pk):
+        em = self.get_object()
+        return Response(serializers.EmployerDetailSerializer(em,context={"request": request}).data, status=status.HTTP_200_OK, )
 
     @action(methods=['get'], detail=False)
     def search_employer(self, request):
         q = request.query_params.get("q")
         if q:
-            employer = Employer.objects.get(companyName__icontains=q)
-            if employer:
-                return Response(serializers.EmployerSerializer(employer).data, status=status.HTTP_200_OK)
+            employers = Employer.objects.filter(companyName__icontains=q)
+            if employers:
+                return Response(serializers.EmployerSerializer(employers, many=True).data, status=status.HTTP_200_OK)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=['get'], detail=True)
+    def get_posts(self,request,pk):
+        posts = RecruitmentPost.objects.filter(employer=self.get_object())
+        return Response(serializers.RecruitmentPostSerializer(posts, many=True).data,status=status.HTTP_200_OK)
 
     @action(methods=['post'], detail=True, url_path='comments')
     def add_comment(self, request, pk):
@@ -245,3 +254,71 @@ class AreaViewSet(viewsets.ViewSet, generics.ListAPIView):
 class CareerViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Career.objects.all()
     serializer_class = serializers.CareerSerilizer
+
+
+class PasswordResetViewset(viewsets.ViewSet):
+    serializer_class = PasswordResetSerializer
+
+    @action(methods=['post'], detail=False)
+    def sendmail(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                return Response({"error": "User with this email does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
+            # Generate token
+            token = default_token_generator.make_token(user)
+
+            # Construct reset link
+            # Tạo mã xác nhận ngẫu nhiên
+            confirmation_code = ''.join(random.choices('0123456789', k=6))
+            # Lưu mã xác nhận vào cơ sở dữ liệu hoặc cache
+            # Ở đây ta lưu vào session
+            request.session['confirmation_code'] = confirmation_code
+            request.session['email'] = email
+
+            send_mail(
+                'Xác nhận đổi mật khẩu',
+                f'Mã xác nhận của bạn là: {confirmation_code}',
+                'your@email.com',
+                [email],
+                fail_silently=False,
+            )
+
+            return Response({"success": "Password reset link sent successfully."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'])
+    def confirm_code(self, request):
+        code = request.data.get('code')
+
+        if 'confirmation_code' in request.session and 'email' in request.session:
+            if code == request.session['confirmation_code']:
+                # Xác nhận thành công
+                return Response({'success': 'Mã xác nhận hợp lệ'}, status=status.HTTP_200_OK)
+
+        return Response({'error': 'Mã xác nhận không hợp lệ'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'])
+    def reset_password(self, request):
+        new_password = request.data.get('new_password')
+        confirm_password = request.data.get('confirm_password')
+
+        if new_password != confirm_password:
+            return Response({'error': 'Mật khẩu không khớp'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if 'email' in request.session:
+            # Thay đổi mật khẩu
+            user = User.objects.get(email=request.session['email'])
+            user.password = make_password(new_password)
+            user.save()
+
+            # Xóa session sau khi thay đổi mật khẩu thành công
+            del request.session['email']
+
+            return Response({'success': 'Thay đổi mật khẩu thành công'}, status=status.HTTP_200_OK)
+
+        return Response({'error': 'Mã xác nhận chưa được xác thực'}, status=status.HTTP_400_BAD_REQUEST)

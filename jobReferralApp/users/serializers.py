@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from users.models import User, Applicant, Employer, Skill, Area, Career, Comment, Rating
 
+from jobs.models import RecruitmentPost
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -12,6 +14,8 @@ class UserSerializer(serializers.ModelSerializer):
                 'write_only': True
             }
         }
+
+
 
 
 class SkillSerilizer(serializers.ModelSerializer):
@@ -63,7 +67,7 @@ class EmployerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Employer
-        fields = ['user', 'companyName','position','information','address','mediaLink','companySize']
+        fields = ['user', 'companyName','position','information','address','mediaLink','companySize','id']
 
     def update(self, instance, validated_data):  # có thể sửa thông tin user bên trong employer instance
         user_data = validated_data.pop('user', {})  # Lấy dữ liệu của user từ validated_data
@@ -74,27 +78,76 @@ class EmployerSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+class CareerSerialzier(serializers.ModelSerializer):
+    class Meta:
+        model = Career
+        fields = '__all__'
+
+class RecruitmentPostSerializer(serializers.ModelSerializer):
+    employer = EmployerSerializer()
+    career = CareerSerialzier()
+    class Meta:
+        model = RecruitmentPost
+        fields = '__all__'
+
+
+
 class EmployerDetailSerializer(EmployerSerializer):
     liked = serializers.SerializerMethodField()
+    comments = serializers.SerializerMethodField()
+    ratings = serializers.SerializerMethodField()
+    posts = serializers.SerializerMethodField()
 
     def get_liked(self, employer):
         request = self.context.get('request')
         if request.user.is_authenticated:
             return employer.like_set.filter(active=True).exists()
 
+    def get_comments(self, employer):
+        comments = employer.comment_set.all()
+        if comments:
+            serializer = CommentSerializer(comments, many=True)
+            return serializer.data
+
+    def get_ratings(self, employer):
+        r = employer.rating_set.all()
+        if r:
+            serializer = RatingSerializer(r, many=True)
+            return serializer.data
+
+    def get_posts(self, employer):
+        posts = employer.recruitmentpost_set.all()
+        if posts:
+            serializer = RecruitmentPostSerializer(posts, many =True)
+            return serializer.data
+
     class Meta:
         model = EmployerSerializer.Meta.model
-        fields = EmployerSerializer.Meta.fields + ['liked']
+        fields = EmployerSerializer.Meta.fields + ['liked'] + ['comments'] + ['posts'] + ['ratings']
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    infouser = serializers.SerializerMethodField()
     class Meta:
         model = Comment
-        fields = '__all__'
+        fields = ['id', 'applicant', 'employer', 'infouser']
+
+
+    def get_infouser (self,cmt):
+        u = cmt.applicant.user
+        serializer = UserSerializer(u)
+        return serializer.data
+
+
+
 
 
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
-        fields = '__all__'
+        fields = ['id', 'rate']
+
+
+class PasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField()
 

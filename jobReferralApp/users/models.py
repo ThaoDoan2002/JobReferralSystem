@@ -1,7 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from cloudinary.models import CloudinaryField
-from ckeditor.fields import RichTextField
+from django.db import models
+
+# Create your models here.
+from django.contrib.auth.models import (
+    AbstractBaseUser, BaseUserManager, PermissionsMixin)
+
+from django.db import models
+from django.utils.text import slugify
 
 
 class User(AbstractUser):
@@ -11,14 +18,19 @@ class User(AbstractUser):
     is_applicant = models.BooleanField(default=False)
     sex = models.CharField(max_length=50, null=True)
 
+
+
+
 class Employer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     companyName = models.CharField(max_length=255, blank=True, null=True)
     position = models.CharField(max_length=255, blank=True, null=True)
-    information = RichTextField(null=True, blank=True, default="abc")
+    information = models.TextField(null=True, blank=True)
     address = models.CharField(max_length=255, blank=True, null=True)
     mediaLink = models.CharField(max_length=255, blank=True, null=True)
     companySize = models.IntegerField(blank=True, null=True)
+
+
 
     # xét blank, null = True để khi đăng ký tài khoản thì chỉ điền thông tin cơ bản rồi sau khi đã đăng ký user sẽ vào account của mình để setting
 
@@ -59,7 +71,10 @@ class Applicant(models.Model):
     wage = models.CharField(max_length=255)  # lương mong muốn
     career = models.ForeignKey(Career, on_delete=models.RESTRICT, null=True, blank=True)
     cv = CloudinaryField('cv', null=True, blank=True)
-    #workingform
+    workingForm = models.CharField(max_length=255,null=True, blank=True)
+
+
+
 
     def __str__(self):
         return self.user.username
@@ -85,6 +100,10 @@ class Interaction(BaseModel):
 class Comment(Interaction):
     content = models.CharField(max_length=255, null=False)
 
+    def __str__(self):
+        return self.content
+
+
 
 class Like(Interaction):
     active = models.BooleanField(default=True)
@@ -95,5 +114,8 @@ class Like(Interaction):
 
 class Rating(Interaction):
     rate = models.SmallIntegerField(default=0)
+    class Meta:
+        unique_together = ('applicant', 'employer')
+
 
 

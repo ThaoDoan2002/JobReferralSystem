@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-h!&l+cr&)$1(rbqr=5n_rg#8orqtv4)&-%%!s)u+-uv#j)z)2t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.1.7', 'localhost', '127.0.0.1']
 
 # Application definition
 
@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'django_filters',
     'drf_yasg',
+    "debug_toolbar",
+    "corsheaders",
 
 ]
 
@@ -55,25 +57,31 @@ REST_FRAMEWORK = {
     )
 }
 
-# import cloudinary
-#
-# cloudinary.config(
-#     cloud_name="dzrgeifj0",
-#     api_key="379262584825783",
-#     api_secret="Jfur6eOyJ9gMBbbdM9nwBGKoL4E"
-# )
+import cloudinary
 
-CLOUDINARY = {
-      'cloud_name': 'dzrgeifj0',
-      'api_key': '379262584825783',
-      'api_secret': 'Jfur6eOyJ9gMBbbdM9nwBGKoL4E',
-      'api_proxy': 'http://proxy.server:3128'
-}
+cloudinary.config(
+    cloud_name="dzrgeifj0",
+    api_key="379262584825783",
+    api_secret="Jfur6eOyJ9gMBbbdM9nwBGKoL4E"
+)
+
+# CLOUDINARY = {
+#     'cloud_name': 'dzrgeifj0',
+#     'api_key': '379262584825783',
+#     'api_secret': 'Jfur6eOyJ9gMBbbdM9nwBGKoL4E',
+#     'api_proxy': 'http://proxy.server:3128'
+# }
 
 MAILCHIMP_API_KEY = 'e4bc513bb8a430403af5f826dba47590-us17'
 MAILCHIMP_LIST_ID = '6c0097fbaa'
 
+CORS_ALLOW_ALL_ORIGINS = True
+
 MIDDLEWARE = [
+    'users.middlewares.RateLimitMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -81,6 +89,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+]
+INTERNAL_IPS = [
+    # ...
+    '127.0.0.1',
+    # ...
 ]
 
 ROOT_URLCONF = 'jobReferralApp.urls'
@@ -96,6 +110,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+
             ],
         },
     },
@@ -172,8 +187,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CLIENT_ID = "5NScGJpmf2F1es7gE7dcv9DqKjADI2vaTlF4yUbJ"
-CLIENT_SECRET = "gMGgwEzq0C5TIq7pHGcV31DgoOBlwOU4123DmlipSnYnQuYi0LXmKYMpJVVDjQCPirV2o3lwodAs6n9z0mQqEKbWWB7BdBq1QC88o46Dyc53qdFAFlzERSDo3Cwgv7lh"
+CLIENT_ID = "K01jWgeEoLCoRC1cr7gY5PXpCZvZwXKJOWaYrunn"
+CLIENT_SECRET = "BiLFy1fOCNB1cKXgOMACXntMoNwPJLOOAUqtdhrlT4UgRsqd2UawejeGfPheWI8IcdCMqixFE6AsxUUOMF8iP5dv4icm6HfVGIOr1nqlQNvCGO7eORHymbSkEtO5Zpp6"
 
 # gửi dữ liệu json
 OAUTH2_PROVIDER = {

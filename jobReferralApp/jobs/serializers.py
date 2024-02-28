@@ -11,6 +11,7 @@ class CareerSerialzier(serializers.ModelSerializer):
         fields = '__all__'
 
 
+
 class RecruitmentPostSerializer(serializers.ModelSerializer):
     employer = EmployerSerializer()
     career = CareerSerialzier()

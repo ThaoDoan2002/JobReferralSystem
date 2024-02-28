@@ -21,7 +21,5 @@ class JobApplicationAdminSite(admin.AdminSite):
 
 
 admin_site = JobApplicationAdminSite(name="myapp")
-
-
 admin_site.register(JobApplication)
 admin_site.register(RecruitmentPost)
