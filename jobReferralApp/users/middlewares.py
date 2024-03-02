@@ -19,7 +19,7 @@ class RateLimitMiddleware:
         limit = 100
 
         # Thời gian reset, ví dụ: mỗi 1 giờ
-        reset_time = 60
+        reset_time = 3600
 
         # Lấy số lần request đã gửi trong khoảng thời gian trước đó
         count = cache.get(cache_key, 0)

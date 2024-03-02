@@ -46,16 +46,39 @@ INSTALLED_APPS = [
     'drf_yasg',
     "debug_toolbar",
     "corsheaders",
+    'import_export',
+    "phonenumber_field",
+    'social_django',
+    'drf_social_oauth2',
 
 ]
+
 
 CKEDITOR_UPLOAD_PATH = "images/jobs/"
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'drf_social_oauth2.authentication.SocialAuthentication',
     )
 }
+
+AUTHENTICATION_BACKENDS = (
+
+    'social_core.backends.google.GoogleOAuth2',
+    'drf_social_oauth2.backends.DjangoOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+# Google configuration
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '171127237792-v68jnpqt57r9o2pth4dp7luipffl09ih.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
+
+# Define SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE to get extra permissions from Google.
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+]
 
 import cloudinary
 
@@ -110,7 +133,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -187,8 +211,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CLIENT_ID = "K01jWgeEoLCoRC1cr7gY5PXpCZvZwXKJOWaYrunn"
-CLIENT_SECRET = "BiLFy1fOCNB1cKXgOMACXntMoNwPJLOOAUqtdhrlT4UgRsqd2UawejeGfPheWI8IcdCMqixFE6AsxUUOMF8iP5dv4icm6HfVGIOr1nqlQNvCGO7eORHymbSkEtO5Zpp6"
+CLIENT_ID = "e7dHMD3lSDBcEBZChyEbGFPgVUPHBuYc5UF4v7Aj"
+CLIENT_SECRET = "y90c8NImeK0xVGrYuimCPxCnbjeBaShPg4B3gZa9VofgkGaxDiV0XJhVurnexnDIhCbxYZmqTR1Ypiff65xOosBlArA045ZMeoVeNP87rdwtT1lsil2ZhrWC8BtUXVN5"
 
 # gửi dữ liệu json
 OAUTH2_PROVIDER = {

@@ -40,7 +40,7 @@ class RecruitmentPostViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Re
         if self.action in ['create_post']:
             # Cho phép người dùng đã xác thực tạo mới (POST)
             return [perms.EmIsAuthenticated()]
-        elif self.action in ['update', 'partial_update', 'destroy']:
+        elif self.action in ['update_post', 'destroy']:
             # Chỉ cho phép chủ sở hữu cập nhật (PUT, PATCH, DELETE)
             return [perms.EmOwnerAuthenticated()]
         elif self.action in ['search_posts', 'filter_posts']:
@@ -139,4 +139,4 @@ class RecruitmentPostViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Re
         queries = connection.queries
         num_queries = len(queries)
         #return Response({"message": "API Response", "num_queries": num_queries})5
-        return Response(serializers.JobApplicationSerializer(jobApp).data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_201_CREATED)

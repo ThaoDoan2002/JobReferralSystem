@@ -7,13 +7,14 @@ from jobs.models import RecruitmentPost
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'password', 'email', 'is_employer', 'is_applicant',
-                  'phoneNumber', 'avatar', 'is_superuser']
+        fields = ['id','first_name', 'last_name', 'username', 'password', 'email', 'is_employer', 'is_applicant',
+                  'phoneNumber', 'avatar', 'is_superuser', 'sex']
         extra_kwargs = {
             'password': {
                 'write_only': True
             }
         }
+
 
 
 
@@ -67,7 +68,7 @@ class EmployerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Employer
-        fields = ['user', 'companyName','position','information','address','mediaLink','companySize','id']
+        fields = ['id','user', 'companyName','position','information','address','mediaLink','companySize']
 
     def update(self, instance, validated_data):  # có thể sửa thông tin user bên trong employer instance
         user_data = validated_data.pop('user', {})  # Lấy dữ liệu của user từ validated_data
@@ -130,7 +131,7 @@ class CommentSerializer(serializers.ModelSerializer):
     infouser = serializers.SerializerMethodField()
     class Meta:
         model = Comment
-        fields = ['id', 'applicant', 'employer', 'infouser']
+        fields = ['id', 'applicant', 'employer','content', 'infouser']
 
 
     def get_infouser (self,cmt):

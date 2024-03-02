@@ -49,7 +49,7 @@ def createUser(sender, instance, created, **kwargs):
         if instance.is_applicant and instance.is_employer:
             instance.delete()
 
-        #Message Flash
 
 
 post_save.connect(createUser, sender=User)
+

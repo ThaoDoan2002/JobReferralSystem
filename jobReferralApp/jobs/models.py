@@ -1,11 +1,13 @@
+import uuid
+
 from django.db import models
 from django.utils.text import slugify
 from users.models import Employer, Area, Applicant, Career
 
 
 class BaseModel(models.Model):
-    created_date = models.DateTimeField(auto_now_add=True, null=True)
-    updated_date = models.DateTimeField(auto_now=True, null=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=True)
 
     class Meta:
@@ -13,20 +15,20 @@ class BaseModel(models.Model):
 
 
 class RecruitmentPost(BaseModel):
+    id = models.UUIDField(default=uuid.uuid4, unique=True,
+                          primary_key=True, editable=False)
     employer = models.ForeignKey(Employer, models.CASCADE)
     title = models.CharField(max_length=255)
-    experience = models.CharField(max_length=255,null=True,default="1 năm")
-    expirationDate = models.DateField(null=True, blank=True, default="2025-01-20")
-    description = models.TextField(null=True, blank=True)
-    quantity = models.IntegerField(null=True,default="1")
-    sex = models.CharField(max_length=50,null=True,default="ABC")
-    workingForm = models.CharField(max_length=255,null=True,default="ABC")
-    area = models.CharField(max_length=255,null=True,default="ABC")
-    wage = models.CharField(max_length=255,null=True,default="ABC")
-    position = models.CharField(max_length=255,null=True,default="ABC")
-    career = models.ForeignKey(Career, on_delete=models.RESTRICT, null=True, blank=True)
-
-
+    experience = models.CharField(max_length=255)
+    expirationDate = models.DateField()
+    description = models.TextField(null=True,blank=True)
+    quantity = models.IntegerField()
+    sex = models.CharField(max_length=50)
+    workingForm = models.CharField(max_length=255)
+    area = models.CharField(max_length=255)
+    wage = models.CharField(max_length=255)
+    position = models.CharField(max_length=255)
+    career = models.ForeignKey(Career, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.title
@@ -38,6 +40,8 @@ class RecruitmentPost(BaseModel):
 
 
 class JobApplication(BaseModel):
+    id = models.UUIDField(default=uuid.uuid4, unique=True,
+                          primary_key=True, editable=False)
     testdate = models.DateTimeField(null=True)
     recruitment = models.ForeignKey(RecruitmentPost, models.RESTRICT, null=True)  # luu tru thi khong nen cascade => RESTRICT
     applicant = models.ForeignKey(Applicant, models.RESTRICT)

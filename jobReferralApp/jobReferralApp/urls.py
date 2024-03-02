@@ -14,14 +14,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-
+from django.contrib import admin
 from django.urls import path, include, re_path
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
 from jobs.admin import admin_site
-
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -35,9 +34,10 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,))
 
 urlpatterns = [
-    path('admin/', admin_site.urls),
+    path('admin/', admin.site.urls),
     path('', include('jobs.urls')),
     path('', include('users.urls')),
+    path('auth/', include('drf_social_oauth2.urls')),
     path('o/', include('oauth2_provider.urls',
                        namespace='oauth2_provider')),
     re_path(r'^swagger(?P<format>\.json|\.yaml)$',

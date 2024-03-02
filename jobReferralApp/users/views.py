@@ -35,8 +35,9 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
             return Response(serializers.ApplicantSerializer(request.user.applicant, context={'request': request}).data)
         elif request.user.is_employer:
             return Response(serializers.EmployerSerializer(request.user.employer, context={'request': request}).data)
-        elif request.user.is_superuser:
+        else:
             return Response(serializers.UserSerializer(request.user).data, status=status.HTTP_200_OK)
+
 
 
 class ApplicantViewSet(viewsets.ViewSet,generics.RetrieveAPIView, generics.ListAPIView):
@@ -46,7 +47,7 @@ class ApplicantViewSet(viewsets.ViewSet,generics.RetrieveAPIView, generics.ListA
     filterset_class = filters.ApplicantFilter
 
     def get_permissions(self):
-        if self.action in ['update', 'partial_update']:
+        if self.action in ['update_applicant']:
             return [perms.AppOwnerAuthenticated()]
         elif self.action in ['search_applicant', 'filter_applicant']:
             return [perms.EmIsAuthenticated()]
@@ -161,15 +162,15 @@ class ApplicantViewSet(viewsets.ViewSet,generics.RetrieveAPIView, generics.ListA
     @action(methods=['get'], detail=False)
     def suggest_Job(self, request):
         applicant = request.user.applicant
-        # thieu workingform
+
         applicant_areas = applicant.areas.values_list('name', flat=True)
         posts = RecruitmentPost.objects.filter(experience__icontains=applicant.experience,
                                                sex__icontains=applicant.user.sex,
                                                area__in=applicant_areas,
                                                wage__icontains=applicant.wage,
                                                position__icontains=applicant.position,
-                                               career=applicant.career
-                                               )
+                                               career=applicant.career,
+                                               workingForm__icontains=applicant.workingForm)
         return Response(RecruitmentPostSerializer(posts, many=True).data, status=status.HTTP_200_OK)
 
 
@@ -180,7 +181,7 @@ class EmployerViewSet(viewsets.ViewSet, generics.UpdateAPIView):
     def get_permissions(self):
         if self.action in ['update', 'partial_update']:
             return [perms.EmOwnerAuthenticated()]
-        elif self.action in ('search_employer', 'like', 'add_comment'):
+        elif self.action in ('search_employer', 'like', 'add_comment','add_rating'):
             return [perms.AppIsAuthenticated()]
         elif self.action.__eq__('get_posts'):
             return [perms.EmIsAuthenticated()]
